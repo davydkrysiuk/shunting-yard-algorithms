@@ -62,44 +62,42 @@ void push_tk_arr(Tokens *tk_arr, char *value, TokenType type) {
   tk_arr->count++;
 }
 
-void str_append(char* str, char value) {
-  str[strlen(str)] = value;
-  str[strlen(str) + 1] = '\0';
-}
-
 Tokens tokenize(char* input) {
   Tokens tk_arr = init_tk_arr();
 
   char* buffer = malloc(sizeof(char));
-
+  buffer[0] = '\0';
+  
   for (int i = 0; i < strlen(input); ++i) {
+
 	if (input[i] == ' ') continue;
+	
 	if (isdigit(input[i])) {
-	  str_append(buffer, input[i]);
+	  size_t len = strlen(buffer);
+	  buffer = realloc(buffer, (len + 2) * sizeof(char));
+	  buffer[len] = input[i];
+	  buffer[len + 1] = '\0';
 	} else {
 	  if (buffer[0] != '\0') {
 		push_tk_arr(&tk_arr, buffer, NUMBER);
-
-		push_tk_arr(&tk_arr, ch_to_str(input[i]), tktp_by_char(input[i]));
 		buffer[0] = '\0';
+		push_tk_arr(&tk_arr, ch_to_str(input[i]), tktp_by_char(input[i]));
 	  } else {
 		push_tk_arr(&tk_arr, ch_to_str(input[i]), tktp_by_char(input[i]));
-		buffer[0] = '\0';
 	  }
 	}
   }
 
   if (buffer[0] != '\0') {
 	if (is_number(buffer) == 1) push_tk_arr(&tk_arr, buffer, NUMBER);
-	if (is_number(buffer) == 0) push_tk_arr(&tk_arr, ch_to_str(buffer[0]), tktp_by_char(buffer[0]));
   }
 
-
+  free(buffer);
   return tk_arr;
 }
 
 int main() {
-  char *input = "(2 + 2) * 3";
+  char *input = "(1234567892 + 345) * 6789";
   Tokens tk_arr = tokenize(input);
 
   for (int i = 0; i < tk_arr.count; i++) {
